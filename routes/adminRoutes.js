@@ -14,7 +14,7 @@ router.route("/action").post(upload.single("image"), adminController.createCar);
 
 router
   .route("/action/:id")
-  .patch(upload.single("newImage"), adminController.editCar);
+  .post(upload.single("newImage"), adminController.editCar);
 
 router.route("/delete/:id").get(adminController.deleteCar);
 

@@ -18,5 +18,7 @@ mongoose
   .catch((err) => console.info("database failed to connect"));
 
 app.listen(PORT, () => {
-  console.info(`sever listening at port ${PORT}`);
+  console.info(
+    `Car management dashboard listening at http://localhost:${PORT}/dashboard`
+  );
 });

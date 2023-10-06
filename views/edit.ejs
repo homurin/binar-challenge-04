@@ -100,8 +100,7 @@
                                 </h5>
                             </div>
 
-                            <form action="/dashboard/action/<%= car.id %>?_method=PATCH" method="post"
-                                enctype="multipart/form-data">
+                            <form action="/dashboard/action/<%= car.id %>" method="post" enctype="multipart/form-data">
                                 <div class="bg__white mt-2">
                                     <div class="row">
                                         <div class="col-lg-6">
@@ -135,7 +134,8 @@
                                                         <% for(const option of options){ const
                                                             selected=(option.toLowerCase()==car.category ? 'selected'
                                                             :'') %>
-                                                            <option name="<%= option%>" <%=selected %>>
+                                                            <option name="<%= option%>"
+                                                                value="<%= option.toLowerCase() %>" <%=selected %>>
                                                                 <%= option%>
                                                             </option>
                                                             <%}%>

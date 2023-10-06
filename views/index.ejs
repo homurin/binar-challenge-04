@@ -44,7 +44,7 @@
                                 </li>
                             </ul>
                             <div class="d-flex ">
-                                <form class="d-flex" role="search ">
+                                <form id="searchName" action="/dashboard" class="d-flex" role="search ">
                                     <input class="form-control " type="search" name="name" placeholder="Search"
                                         aria-label="Search">
                                     <button class="btn btn-outline-success" type="submit">Search</button>
@@ -114,27 +114,29 @@
                             </div>
 
                             <div class="d-flex button__group">
-                                <a href="/dashboard"
-                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:3000/dashboard' ? 'active' : '') %> me-3">All</a>
-                                <a href="?category=small"
-                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:3000/?category=small' ? 'active' : '') %> me-3">Small</a>
-                                <a href="?category=medium"
-                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:3000/?category=medium' ? 'active' : '') %>  me-3">Medium</a>
-                                <a href="?category=large"
-                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:3000/?category=large' ? 'active' : '') %>  me-3">Large</a>
+                                <a href="/dashboard<%= allCategory %>"
+                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:'+PORT+'/dashboard' ? 'active' : '') %> me-3">All</a>
+                                <a href="?category=small<%= searchQuery %>"
+                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:'+PORT+'/dashboard?category=small' ? 'active' : '') %> me-3">Small</a>
+                                <a href="?category=medium<%= searchQuery %>"
+                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:'+PORT+'/dashboard?category=medium' ? 'active' : '') %>  me-3">Medium</a>
+                                <a href="?category=large<%= searchQuery %>"
+                                    class="btn button__secondary <%= (fullUrl === 'http://localhost:'+PORT+'/dashboard?category=large' ? 'active' : '') %>  me-3">Large</a>
                             </div>
 
                             <div class="row mt-4">
                                 <% cars.map((car)=>{ %>
                                     <div class="col-lg-4 my-2">
                                         <div class="card px-2 py-4">
-                                            <img height="222px" src="<%= car.image %>" class="card-img-top text-center"
+                                            <img height="222px" src="<%= car.image %>" alt="<%= car.name %>"
+                                                class="card-img-top text-center"
                                                 style="aspect-ratio: 2/1; object-fit: contain;">
                                             <div class="card-body">
                                                 <h5 class="card- title h5__tipe">
                                                     <%= car.name; %>
                                                 </h5>
-                                                <h5 class="card-title h5__hari">Rp <%= car.price; %> / hari</h5>
+                                                <h5 class="card-title h5__hari">Rp <%= car.price.toLocaleString(); %>,00
+                                                        / hari</h5>
                                                 <div class="row mt-3">
                                                     <p class="p__date"><img src="images/fi_clock.png" height="18px"
                                                             class="pe-1" alt=""> Updated at <%= car.updatedAt %>
@@ -143,7 +145,7 @@
 
                                                 <div class="d-flex">
                                                     <a class="btn btn__danger me-2 btn__modal" style="width: 143.5px; "
-                                                        data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                                        data-bs-toggle="modal" data-bs-target="#exampleModal<%=car.id%>"
                                                         data-id="id"><img class="pe-2" src="images/fi_trash-2.png"
                                                             alt="">Delete</a>
                                                     <a class="btn btn__success" href="/dashboard/edit/<%= car.id %>"
@@ -155,7 +157,7 @@
                                     </div>
 
                                     <!-- Modal -->
-                                    <div class="modal fade" id="exampleModal" tabindex="-1"
+                                    <div class="modal fade" id="exampleModal<%= car.id %>" tabindex="-1"
                                         aria-labelledby="exampleModalLabel" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div
@@ -184,12 +186,13 @@
     </section>
 
     <script>
+
         // const modals = document.querySelectorAll('.btn__modal')
         // const trigger = document.querySelector('.btn__delete')
         // modals.forEach((modal) => {
         //     modal.addEventListener('click', e => {
         //         const id = modal.getAttribute('data-id')
-        //         trigger.href = `/dashboard/delete/${e.dataset.id}`
+        //         trigger.href = `/dashboard/delete/${e.}`
         //     })
         // })
     </script>

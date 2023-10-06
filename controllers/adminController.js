@@ -6,16 +6,26 @@ const publicDirectory = path.join(__dirname, `public/`);
 
 const dashboardPage = async (req, res) => {
   try {
+    const { protocol, hostname, originalUrl } = req;
+    const PORT = process.env.PORT;
     const { name, category } = req.query;
+    const fullUrl = `${protocol}://${hostname}:${PORT}${originalUrl}`;
+
     const condition = {};
-    if (name) condition.name = { $regex: ".*" + name + "*." };
+    const searchQuery = name ? `&name=${name}` : "";
+    const allCategory = name ? `?name=${name}` : "";
+
+    if (name) condition.name = { $regex: ".*" + name + "*.", $options: "i" };
     if (category) condition.category = category;
     const cars = await Car.find().where(condition);
     const data = {
       status: req.flash("status"),
       message: req.flash("message"),
       cars: cars,
-      fullUrl: "",
+      PORT,
+      allCategory,
+      searchQuery,
+      fullUrl,
     };
     res.render("index", data);
   } catch (err) {
