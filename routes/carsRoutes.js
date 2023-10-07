@@ -9,6 +9,10 @@ router
   .get(carsController.findCars)
   .post(upload.single("image"), carsController.createCar);
 
-router.route("/:id").get(carsController.findCarById);
+router
+  .route("/:id")
+  .get(carsController.findCarById)
+  .patch(upload.single("image"), carsController.editCarById)
+  .delete(carsController.deleteCarById);
 
 export default router;

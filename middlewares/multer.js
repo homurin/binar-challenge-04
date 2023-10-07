@@ -1,18 +1,15 @@
 import multer from "multer";
-import path from "path";
 import { __dirname } from "../libs/absolutePath.js";
 
-const publicDirectory = path.join(__dirname, "public");
-const uploadDirectory = path.join(publicDirectory, "uploads");
+const storage = multer.memoryStorage();
+const allowedMimeTypes = ["image/jpg", "image/png", "image/jpeg"];
 
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, uploadDirectory);
-  },
-  filename: (req, file, callback) => {
-    const uniqueSuffix = `${Date.now()}-${Math.random() * 1e9}`;
-    callback(null, `image-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
-});
+const fileFilter = (req, file, cb) => {
+  const isAllowedMimeType = allowedMimeTypes.includes(file.mimetype);
+  if (isAllowedMimeType) {
+    return cb(null, true);
+  }
+  return cb("invalid image extension");
+};
 
-export default multer({ storage });
+export default multer({ storage, fileFilter });

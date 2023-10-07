@@ -1,15 +1,12 @@
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import carsRoutes from "./routes/carsRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
 import morgan from "morgan";
 import flash from "connect-flash";
 import session from "express-session";
+import carsRoutes from "./routes/carsRoutes.js";
 import cookieParser from "cookie-parser";
+import adminRoutes from "./routes/adminRoutes.js";
+import { __dirname } from "./libs/absolutePath.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const app = express();
 
 app.set("view engine", "ejs");

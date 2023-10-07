@@ -1,7 +1,9 @@
-import fs from "fs/promises";
+import process from "process";
 import path from "path";
+import imagekit from "../libs/imageKit.js";
 import Car from "../models/carsModel.js";
 import { __dirname } from "../libs/absolutePath.js";
+
 const publicDirectory = path.join(__dirname, `public/`);
 
 const dashboardPage = async (req, res) => {
@@ -29,7 +31,6 @@ const dashboardPage = async (req, res) => {
     };
     res.render("index", data);
   } catch (err) {
-    console.info(err);
     res.status(500).json({
       status: "failed",
       message: "Internal server error",
@@ -54,6 +55,11 @@ const editPage = async (req, res) => {
     const data = { car, options };
     res.status(200).render("edit", data);
   } catch (err) {
+    if (err.name === "CastError") {
+      req.flash("status", "failed");
+      req.flash("message", `Sorry car with id ${req.params.id} not found`);
+      return res.status(404).redirect("/dashboard");
+    }
     res
       .status(500)
       .json({ status: "failed", message: "internal server error" });
@@ -61,10 +67,24 @@ const editPage = async (req, res) => {
 };
 
 const createCar = async (req, res) => {
+  const { body: reqBody, file } = req;
+  const fileName = file.originalname;
+  const extension = path.extname(fileName);
+  const alloweedCategories = ["small", "medium", "large"];
+  const isCategoryAllowed = alloweedCategories.includes(reqBody.category);
+
   try {
-    const imageUrl = `/uploads/${req.file.filename}`;
-    const reqBody = req.body;
-    await Car.create({ ...reqBody, image: imageUrl });
+    if (!isCategoryAllowed) {
+      req.flash("status", "failed");
+      req.flash("message", "failed to create car");
+      return res.status(400).redirect("/dashboard");
+    }
+    const image = await imagekit.upload({
+      file: file.buffer,
+      fileName: `IMG-${Date.now()}.${extension}`,
+    });
+
+    await Car.create({ ...reqBody, image: image.url });
     req.flash("status", "success");
     req.flash("message", "success create new car");
     res.status(301).redirect("/dashboard");
@@ -75,48 +95,55 @@ const createCar = async (req, res) => {
   }
 };
 const editCar = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const reqBody = req.body;
-    const update = { ...reqBody };
-    if (req.file) {
-      const oldImageUrl = path.join(publicDirectory, reqBody.image);
-      const newImageUrl = `/uploads/${req.file.filename}`;
+  const id = req.params.id;
+  const { body: reqBody, file } = req;
+  const update = { ...reqBody };
+  const alloweedCategories = ["small", "medium", "large"];
+  const isCategoryAllowed = alloweedCategories.includes(reqBody.category);
 
-      update.image = newImageUrl;
-      await fs.unlink(oldImageUrl);
+  try {
+    if (!isCategoryAllowed) {
+      req.flash("status", "failed");
+      req.flash("message", "failed to create car");
+      return res.status(400).redirect("/dashboard");
+    }
+    if (req.file) {
+      const fileName = file.originalname;
+      const extension = path.extname(fileName);
+
+      const image = await imagekit.upload({
+        file: file.buffer,
+        fileName: `IMG-${Date.now()}.${extension}`,
+      });
+      update.image = image.url;
     }
     await Car.findByIdAndUpdate(id, update);
     req.flash("status", "success");
     req.flash("message", "success edit car");
     res.status(301).redirect("/dashboard");
   } catch (err) {
-    console.info(err);
     req.flash("status", "failed");
     req.flash("message", "failed to edit car");
     res.status(400).redirect("/dashboard");
   }
 };
 const deleteCar = async (req, res) => {
+  const id = req.params.id;
   try {
-    const id = req.params.id;
-    const car = await Car.findById(id);
-    if (!car) {
-      req.flash("status", "failed");
-      req.flash("message", "failed delete car");
-      res.status(301).redirect("/dashboard");
-    }
-    await fs.unlink(`${__dirname}/public${car.image}`);
     await Car.findByIdAndDelete(id);
 
     req.flash("status", "success");
     req.flash("message", "success delete car");
     res.status(301).redirect("/dashboard");
   } catch (err) {
-    console.info(err);
-    req.flash("status", "failed");
-    req.flash("message", "failed to delete car");
-    res.status(400).redirect("/dashboard");
+    if (err.name === "CastError") {
+      req.flash("status", "failed");
+      req.flash("message", `Sorry car with id ${req.params.id} not found`);
+      return res.status(404).redirect("/dashboard");
+    }
+    res
+      .status(500)
+      .json({ status: "failed", message: "internal server error" });
   }
 };
 
